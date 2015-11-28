@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	./autogen.sh
+	./configure --prefix=/usr \
+		--mandir=\$${prefix}/share/man \
+		--sysconfdir=/etc
+
+override_dh_auto_build:
+	dh_auto_build
+	make doc
+
+override_dh_auto_test:
+	@echo "Disable dh_auto_test"
+
+override_dh_auto_install:
+	dh_auto_install
+	make install-doc DESTDIR=$(CURDIR)/debian/tig
+
+	rm -f debian/tig/usr/share/doc/tig/INSTALL.html \
+		debian/tig/usr/share/doc/tig/README.html
+
+	mkdir -p debian/tig/etc/bash_completion.d
+	cp contrib/tig-completion.bash debian/tig/etc/bash_completion.d/tig
+	chmod 644 debian/tig/etc/bash_completion.d/tig
